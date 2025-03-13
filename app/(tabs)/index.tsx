@@ -1,74 +1,60 @@
-import { Image, StyleSheet, Platform } from 'react-native';
-
+import { Image, StyleSheet, Platform, View } from 'react-native';
+import { useState } from 'react';
+import MapView, { Polyline, Marker } from 'react-native-maps';
 import { HelloWave } from '@/components/HelloWave';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 
 export default function HomeScreen() {
+  // Estado para la región inicial del mapa
+  const [region, setRegion] = useState({
+    latitude: 37.78825, // Latitud inicial (ejemplo: San Francisco)
+    longitude: -122.4324, // Longitud inicial
+    latitudeDelta: 0.0922, // Nivel de zoom (vertical)
+    longitudeDelta: 0.0421, // Nivel de zoom (horizontal)
+  });
+
+  // Coordenadas para dibujar una ruta simple
+  const routeCoordinates = [
+    { latitude: 37.78825, longitude: -122.4324 }, // Punto de inicio
+    { latitude: 37.78600, longitude: -122.4224 }, // Zig: hacia la derecha
+    { latitude: 37.78200, longitude: -122.4324 }, // Zag: hacia la izquierda
+    { latitude: 37.77800, longitude: -122.4224 }, // Zig: hacia la derecha otra vez
+    { latitude: 37.77400, longitude: -122.4324 }, // Zag: hacia la izquierda
+    { latitude: 37.77000, longitude: -122.4224 }, // Zig: hacia la derecha
+    { latitude: 37.76600, longitude: -122.4324 }, // Zag: hacia la izquierda
+    { latitude: 37.76200, longitude: -122.4224 }, // Punto final con zig
+  ];
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+    <View style={styles.container}>
+      <MapView
+        style={styles.map}
+        initialRegion={region} // Región inicial del mapa
+        onRegionChangeComplete={(newRegion) => setRegion(newRegion)} // Actualiza la región al mover el mapa
+      >
+        {/* Marcadores en los puntos de inicio y fin */}
+        <Marker coordinate={routeCoordinates[0]} title="Inicio" />
+        <Marker coordinate={routeCoordinates[routeCoordinates.length - 1]} title="Fin" />
+
+        {/* Dibujar la ruta con Polyline */}
+        <Polyline
+          coordinates={routeCoordinates} // Lista de coordenadas para la ruta
+          strokeColor="#FF0000"
+          strokeWidth={2} 
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12'
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+      </MapView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  map: {
+    width: '100%',
+    height: '100%',
   },
 });
